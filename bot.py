@@ -5,10 +5,11 @@ from config import TOKEN
 from CAR import CAR_BRANDS
 from CITIES import CITIES
 
-
+from questions import questions
+from Answers import Answers
 bot = telebot.TeleBot(TOKEN)
 
-DELIVERY_TIMES = [f"{hour}:{minute}" for hour in range(8, 21) for minute in ('00', '30')]
+DELIVERY_TIMES = [f"{hour}:{minute}" for hour in range(8, 20) for minute in ('00', '30')]
 
 logging.basicConfig(filename='bot.log', level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
@@ -51,34 +52,61 @@ def welcome(message):
         item1 = types.KeyboardButton("Скидки -%")
         item2 = types.KeyboardButton("🚗 Выбор машины")
         item3 = types.KeyboardButton("❓ Часто задаваемые вопросы")
-
-        markup.add(item1, item2, item3)
+        item4 = types.KeyboardButton("Instagram📷")
+        item5 = types.KeyboardButton("Как Пользоваться Ботом❓")
+        markup.add(item1, item2, item3, item4, item5)
 
         bot.send_message(message.chat.id,
-                         f"Добро пожаловать, {message.from_user.first_name}!\nЯ - <b>{bot.get_me().first_name}</b>, бот созданный опытной Лисой.",
+                         f"Добро пожаловать в АвтоАренду, {message.from_user.first_name}!\nЯ - <b>{bot.get_me().first_name}</b>, бот от ExeFox.",
                          parse_mode='html', reply_markup=markup)
     except FileNotFoundError:
         logging.error("Файл приветственного стикера не найден.")
     except Exception as e:
         logging.error(f"Произошла ошибка: {type(e).__name__}, {str(e)}")
 
-bot.message_handler(func=lambda message: message.text in DELIVERY_TIMES)
-def process_delivery_time(message):
-    if get_user_state(message.from_user.id) == DELIVERY_TIME:
-        selected_time = message.text
-        user_data[message.from_user.id]['delivery_time'] = selected_time
 
-        # Записываем выбранное время в файл
-        with open('delivery_times.txt', 'a') as file:
-            file.write(selected_time + '\n')
+@bot.message_handler(func=lambda message: message.text == "❓ Часто задаваемые вопросы")
+def handle_start(message):
+    # Создаем клавиатуру с кнопками вопросов
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    questions = ["Вопрос 1", "Вопрос 2", "Вопрос 3"]  # Замените на фактические вопросы
+    for question in questions:
+        markup.add(types.KeyboardButton(question))
 
-        # Очищаем состояние пользователя
-        clear_user_state(message.from_user.id)
+    # Добавляем кнопку "Назад"
+    markup.add(types.KeyboardButton("Назад"))
 
-        bot.send_message(message.chat.id, f"Выбранное время доставки: {selected_time}")
-    else:
-        bot.send_message(message.chat.id, "Ошибка: выберите время доставки снова.")
+    # Отправляем пользователю сообщение
+    bot.send_message(message.chat.id, "Привет! Выберите вопрос:", reply_markup=markup)
 
+
+@bot.message_handler(func=lambda message: message.text == "Вопрос 1")
+def handle_question_1(message):
+    # Отправляем ответ на вопрос 1
+    bot.send_message(message.chat.id, "Ответ на вопрос 1: ...")  # Замените на фактический ответ
+
+
+# Добавьте обработчики для остальных вопросов (Вопрос 2, Вопрос 3) аналогично
+
+
+
+
+
+
+
+
+@bot.message_handler(func=lambda message: message.text == "Instagram📷")
+def handle_instagram_button(message):
+    instagram_url = "https://www.instagram.com/autoarenda_org/"
+    instagram_image_url = "https://th.bing.com/th/id/OIG1.Ox7kojaGCSw8UJMRhAKW?pid=ImgGn"  # Замените на фактический URL изображения
+
+    # Создаем кнопку с ссылкой на Instagram
+    markup = types.InlineKeyboardMarkup()
+    button = types.InlineKeyboardButton(text="Перейти в Instagram", url=instagram_url)
+    markup.add(button)
+
+    # Отправляем изображение с кнопкой
+    bot.send_photo(message.chat.id, instagram_image_url, reply_markup=markup)
 @bot.message_handler(func=lambda message: message.text == 'Подтвердить')
 def ask_for_name(message):
     update_user_state(message.from_user.id, STATE_NAME)
@@ -129,7 +157,7 @@ def process_driver_license_step(message):
             msg = bot.send_message(message.chat.id, "Ошибка: введите номер водительских прав.")
             bot.register_next_step_handler(msg, process_driver_license_step)
 
-def process_contact_step(message):
+def process_contact_step(message, process_time_step):
     if get_user_state(message.from_user.id) == STATE_CONTACT:
         if message.text.strip() and message.text != 'Подтвердить':
             user_data[message.from_user.id]['contact'] = message.text
@@ -140,23 +168,17 @@ def process_contact_step(message):
             msg = bot.send_message(message.chat.id, "Ошибка: введите контактные данные.")
             bot.register_next_step_handler(msg, process_contact_step)
 
-def process_time_step(message):
-    if get_user_state(message.from_user.id) == DELIVERY_TIME:
-        if message.text.strip() and message.text not in ['Подтвердить', 'Пропустить']:
-            user_data[message.from_user.id]['time'] = message.text
-            # Записываем выбранное время в файл
-            with open('delivery_times.txt', 'a') as file:
-                file.write(f"User ID {message.from_user.id} selected time: {message.text}\n")
-        elif message.text == 'Пропустить':
-            user_data[message.from_user.id]['time'] = 'Не указано'
-        else:
-            msg = bot.send_message(message.chat.id, "Ошибка: выберите время или нажмите 'Пропустить'.")
-            bot.register_next_step_handler(msg, process_time_step)
-            return
+@bot.message_handler(func=lambda message: get_user_state(message.from_user.id) == STATE_CONTACT)
+def process_contact_step(message):
+    if message.text:
+        user_data[message.from_user.id]['contact'] = message.text
         bot.send_message(message.chat.id, "Спасибо, ваш заказ принят.")
         save_rental_info(user_data[message.from_user.id])
         clear_user_state(message.from_user.id)
         user_data.pop(message.from_user.id, None)
+    else:
+        msg = bot.send_message(message.chat.id, "Ошибка: введите контактные данные.")
+        bot.register_next_step_handler(msg, process_contact_step)
 
 def save_rental_info(rental_info):
     try:
@@ -164,26 +186,6 @@ def save_rental_info(rental_info):
             f.write(str(rental_info) + '\n')
     except Exception as e:
         logging.error(f"Ошибка при сохранении информации о заказе: {type(e).__name__}, {str(e)}")
-
-def process_contact_step(message):
-    if get_user_state(message.from_user.id) == STATE_CONTACT:
-        if message.text:
-            user_data[message.from_user.id]['contact'] = message.text
-            bot.send_message(message.chat.id, "Спасибо, ваш заказ принят.")
-            save_rental_info(user_data[message.from_user.id])
-            clear_user_state(message.from_user.id)
-            user_data.pop(message.from_user.id, None)
-        else:
-            msg = bot.send_message(message.chat.id, "Ошибка: введите контактные данные.")
-            bot.register_next_step_handler(msg, process_contact_step)
-
-def save_rental_info(rental_info):
-    try:
-        with open('rental_orders.txt', 'a', encoding='utf-8') as f:
-            f.write(str(rental_info) + '\n')
-    except Exception as e:
-        logging.error(f"Ошибка при сохранении информации о заказе: {type(e).__name__}, {str(e)}")
-
 
 @bot.message_handler(content_types=['text'])
 def lalala(message):
@@ -242,6 +244,7 @@ def lalala(message):
                 send_back_button(message.chat.id, "Пожалуйста, используйте кнопки для навигации.")
     except Exception as e:
         logging.error(f"Произошла ошибка: {type(e).__name__}, {str(e)}")
+
 
 
 bot.polling(none_stop=True)
