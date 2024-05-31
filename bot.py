@@ -119,9 +119,14 @@ def handle_callback_query(call):
             '3': 'Honda',
             '4': 'Volkswagen'
         }[call.data[6:]]
-        handle_callback_query(call)
+        andle_callback_query(call)
     elif call.data.startswith('model_'):
-        user_data['model'] = call.data[6:]
+        user_data['model'] = {
+            "Toyota": ["Corolla", "Camry", "RAV4", "Highlander"],
+            "Ford": ["Focus", "Fusion", "Mustang", "Explorer"],
+            "Honda": ["Civic", "Accord", "CR-V", "Pilot"],
+            "Volkswagen": ["Golf", "Jetta", "Passat", "Tiguan"]
+        }[user_data['brand']][int(call.data[6:]) - 1]
         callback_query_handler_year(call)
     elif call.data.startswith('year'):
         user_data['year'] = call.data[5:]
@@ -131,6 +136,10 @@ def handle_callback_query(call):
         month_names = {1: 'январь', 2: 'февраль', 3: 'март', 4: 'апрель', 5: 'май', 6: 'июнь', 7: 'июль', 8: 'август',
                        9: 'сентябрь', 10: 'октябрь', 11: 'ноябрь', 12: 'декабрь'}
         user_data['month_name'] = month_names.get(user_data['month'], 'Unknown month')
+        day_selector(call)
+    elif call.data.startswith('day'):
+        user_data['day'] = int(call.data[4:])  # Convert to int
+        bot.send_message(call.message.chat.id, f'You selected day {user_data["day"]}.')
         show_delivery_times(call)
     elif call.data == 'main_menu':
         bot.send_message(call.message.chat.id, 'Back to main menu')
@@ -138,7 +147,7 @@ def handle_callback_query(call):
         confirm_booking(call)
 
 
-def handle_callback_query(call):
+def andle_callback_query(call):
     if call.data.startswith('brand_'):
         selected_car_brand = int(call.data[6:]) - 1
         markup = InlineKeyboardMarkup()
@@ -163,7 +172,7 @@ def callback_query_handler_year(call):
                    InlineKeyboardButton("2025", callback_data=f'year_2025'),
                    InlineKeyboardButton("2026", callback_data=f'year_2026'))
     markup.row(InlineKeyboardButton("Back to main menu", callback_data='main_menu'))
-    bot.send_message(call.message.chat.id, 'Please select a year', reply_markup=markup)
+    bot.send_message(call.message.chat.id, 'Выберете год подачи машины', reply_markup=markup)
 
 def select_month(call):
     markup = InlineKeyboardMarkup()
@@ -180,8 +189,20 @@ def select_month(call):
     markup.row(InlineKeyboardButton("November", callback_data=f"month_11"),
                    InlineKeyboardButton("December", callback_data=f"month_12"))
     markup.row(InlineKeyboardButton("Back to main menu", callback_data='main_menu'))
-    bot.send_message(call.message.chat.id, 'Please select a month', reply_markup=markup)
+    bot.send_message(call.message.chat.id, 'Выберете месяц подачи машины', reply_markup=markup)
 
+
+def day_selector(call):
+    markup = InlineKeyboardMarkup()
+    days = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19',
+            '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30']
+    for day in range(0, len(days), 5):
+        markup.row(InlineKeyboardButton(days[day], callback_data=f'day_{days[day]}'),
+                   InlineKeyboardButton(days[day+1], callback_data=f'day_{days[day+1]}'),
+                   InlineKeyboardButton(days[day+2], callback_data=f'day_{days[day+2]}'),
+                   InlineKeyboardButton(days[day+3], callback_data=f'day_{days[day+3]}'),
+                   InlineKeyboardButton(days[day+4], callback_data=f'day_{days[day+4]}'))
+    bot.send_message(call.message.chat.id, 'Выберете день подачи машины', reply_markup=markup)
 
 def show_delivery_times(call):
     markup = InlineKeyboardMarkup()
@@ -191,17 +212,16 @@ def show_delivery_times(call):
                    InlineKeyboardButton(f"{hour+1}:00", callback_data=f"time_{hour+1}:00"),
                    InlineKeyboardButton(f"{hour+1}:30", callback_data=f"time_{hour+1}:30"),
                    InlineKeyboardButton(f"{hour+2}:00", callback_data=f"time_{hour+2}:00"))
-    bot.send_message(call.message.chat.id, 'Select a time', reply_markup=markup)
+    bot.send_message(call.message.chat.id, 'Выберете время подачи машины', reply_markup=markup)
 
 
 
 
 def confirm_booking(call):
-    bot.send_message(call.message.chat.id, 'Бронирование подтверждено!')
-    with open('output.txt', 'w', encoding='utf-8') as f:
-        f.write(str(user_data))
-    bot.send_message(call.message.chat.id, f'Ваши данные бронирования: \nМарка: {user_data.get("brand")}\nМодель: {user_data.get("model")}\nГод: {user_data.get("year")}\nМесяц: {user_data.get("month_name")}\nВремя: {call.data[5:]}')
-
+    bot.send_message(call.message.chat.id, 'Бронирование подтверждено! С вами скоро свяжется наш менеджер')
+    with open('output.txt', 'a', encoding='utf-8') as f:
+        f.write(f'Марка: {user_data.get("brand")}\nМодель: {user_data.get("model")}\nГод: {user_data.get("year")}\nМесяц подачи машины: {user_data.get("month_name")}\nДень подачи машины: {user_data.get("day")}\nВремя подачи машины: {call.data[5:]}\n\n')
+    bot.send_message(call.message.chat.id, f'Ваши данные бронирования: \nМарка: {user_data.get("brand")}\nМодель: {user_data.get("model")}\nГод: {user_data.get("year")}\nМесяц подачи машины: {user_data.get("month_name")}\nДень подачи машины: {user_data.get("day")}\nВремя подачи машины: {call.data[5:]}')
 
 if __name__ == '__main__':
     bot.polling(none_stop=True)
