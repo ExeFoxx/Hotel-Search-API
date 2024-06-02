@@ -1,29 +1,15 @@
+from operator import call
+
+
 import telebot
 from telebot import types
 import logging
 from config import TOKEN
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
-
 bot = telebot.TeleBot(TOKEN)
-
-
-
-
-
-
-booking_data_file = 'booking_data.txt'
-
-
-
-
-
-
-
 logging.basicConfig(filename='bot.log', level=logging.INFO,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-
-# Обработчик команды /start
 @bot.message_handler(commands=['start'])
 def welcome(message):
     try:
@@ -31,12 +17,11 @@ def welcome(message):
             bot.send_sticker(message.chat.id, sti)
 
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-        item1 = types.KeyboardButton("Скидки -%")
-        item2 = types.KeyboardButton("Оставить Заявку🚗")
-        item3 = types.KeyboardButton("❓Часто задаваемые вопросы")
-        item4 = types.KeyboardButton("Instagram📷")
-        item5 = types.KeyboardButton("Как Пользоваться Ботом❓")
-        markup.add(item1, item2, item3, item4, item5, )
+        markup.add(types.KeyboardButton("Скидки -%"),
+                    types.KeyboardButton("Оставить Заявку🚗"),
+                    types.KeyboardButton("❓Часто задаваемые вопросы"),
+                    types.KeyboardButton("Instagram📷"),
+                    types.KeyboardButton("Как Пользоваться Ботом❓"))
 
         bot.send_message(message.chat.id,
                          f"Добро пожаловать в АвтоАренду, {message.from_user.first_name}!\nЯ - <b>{bot.get_me().first_name}</b>, бот от ExeFox.",
@@ -45,8 +30,6 @@ def welcome(message):
         logging.error("Файл приветственного стикера не найден.")
     except Exception as e:
         logging.error(f"Произошла ошибка: {type(e).__name__}, {str(e)}")
-
-
 
 
 
@@ -82,6 +65,7 @@ def handle_instagram_button(message):
     bot.send_photo(message.chat.id, instagram_image_url, reply_markup=markup)
 
 
+user_data = {}
 car_brands = ["Toyota", "Ford", "Honda", "Volkswagen"]
 car_models = {
     "Toyota": ["Corolla", "Camry", "RAV4", "Highlander"],
@@ -122,19 +106,38 @@ city = {
 }
 
 
-user_data = {}
+
+
 @bot.message_handler(func=lambda message: message.text == 'Оставить Заявку🚗')
-def handle_message(message):
-    if message.text == 'Оставить Заявку🚗':
-        markup = InlineKeyboardMarkup()
-        markup.row(InlineKeyboardButton("Toyota", callback_data="brand_1"),
-                   InlineKeyboardButton("Ford", callback_data='brand_2'),
-                   InlineKeyboardButton("Honda", callback_data='brand_3'),
-                   InlineKeyboardButton("Volkswagen", callback_data='brand_4'))
-        markup.row(InlineKeyboardButton("Back to main menu", callback_data='main_menu'))
-        bot.send_message(message.from_user.id, 'Select a car brand', reply_markup=markup)
-    else:
-        bot.send_message(message.from_user.id, 'Invalid command')
+def get_first_name(message):
+    user_data['first_name'] = message.text
+    bot.send_message(message.chat.id, 'Пожалуйста, введите свое Имя:')
+    bot.register_next_step_handler(message, get_second_name_input)
+
+def get_second_name_input(message):
+    user_data['first_name'] = message.text
+    bot.send_message(message.chat.id, 'Пожалуйста, введите свою Фамилию:')
+    bot.register_next_step_handler(message, get_last_name_input)
+
+def get_last_name_input(message):
+    user_data['last_name'] = message.text
+    bot.send_message(message.chat.id, 'Пожалуйста, введите свой номер телефона:')
+    bot.register_next_step_handler(message, get_phone_number_input)
+
+def get_phone_number_input(message):
+    user_data['phone_number'] = message.text
+    user_data['full_name'] = f"{user_data['first_name']} {user_data['last_name']}"
+    bot.send_message(message.chat.id, 'Выберете Марку Машины:')
+    markup = InlineKeyboardMarkup()
+    markup.row(InlineKeyboardButton("Toyota", callback_data="brand_1"),
+               InlineKeyboardButton("Ford", callback_data='brand_2'),
+               InlineKeyboardButton("Honda", callback_data='brand_3'),
+               InlineKeyboardButton("Volkswagen", callback_data='brand_4'))
+    markup.row(InlineKeyboardButton("Back to main menu", callback_data='main_menu'))
+    bot.send_message(message.chat.id, 'Выберете Марку Машины', reply_markup=markup)
+
+
+
 
 
 
@@ -167,7 +170,7 @@ def handle_callback_query(call):
         day_selector(call)
     elif call.data.startswith('day'):
         user_data['day'] = int(call.data[4:])  # Convert to int
-        bot.send_message(call.message.chat.id, f'You selected day {user_data["day"]}.')
+        bot.send_message(call.message.chat.id, f'Вы выбрали день {user_data["day"]}.')
         show_delivery_times(call)
     elif call.data.startswith('time'):
         user_data['time'] = call.data[5:]
@@ -180,10 +183,9 @@ def handle_callback_query(call):
                       '13': 'Никшич', '14': 'Плав', '15': 'Плевля', '16': 'Плужине', '17': 'Рожае', '18': 'Тиват',
                       '19': 'Улцинь', '20': 'Херцег-Нови', '21': 'Шавник'}
         user_data['city_name'] = city_names.get(str(city_number), 'Unknown city')
-        bot.send_message(call.message.chat.id, f'You selected city {user_data["city_name"]}.')
+
         confirm_booking(call)
-    elif call.data == 'main_menu':
-        bot.send_message(call.message.chat.id, f'Back to main menu')
+
 
 def andle_callback_query(call):
     if call.data.startswith('brand_'):
@@ -196,14 +198,14 @@ def andle_callback_query(call):
             else:
                 markup.row(InlineKeyboardButton(car_models[car_brands[selected_car_brand]][i], callback_data=f"model_{i+1}"))
         markup.row(InlineKeyboardButton("Back to main menu", callback_data='main_menu'))
-        bot.send_message(call.message.chat.id, 'Select a car model', reply_markup=markup)
+        bot.send_message(call.message.chat.id, 'Выберите модель машины', reply_markup=markup)
     elif call.data.startswith('model_'):
         # не обновляйте user_data['brand']
         selected_car_model = int(call.data[6:]) - 1
-        bot.send_message(call.message.chat.id, f"You selected {call.data[6:]}", reply_markup=InlineKeyboardMarkup())
+        bot.send_message(call.message.chat.id, f"Вы выбрали {call.data[6:]}", reply_markup=InlineKeyboardMarkup())
     elif call.data == 'main_menu':
         # не обновляйте user_data['brand']
-        bot.send_message(call.message.chat.id, 'Main menu', reply_markup=InlineKeyboardMarkup())
+        bot.send_message(call.message.chat.id, 'Главное Меню', reply_markup=InlineKeyboardMarkup())
 
 
 
@@ -212,25 +214,25 @@ def callback_query_handler_year(call):
     markup.row(InlineKeyboardButton("2024", callback_data=f'year_2024'),
                    InlineKeyboardButton("2025", callback_data=f'year_2025'),
                    InlineKeyboardButton("2026", callback_data=f'year_2026'))
-    markup.row(InlineKeyboardButton("Back to main menu", callback_data='main_menu'))
-    bot.send_message(call.message.chat.id, 'Выберете год подачи машины', reply_markup=markup)
+    markup.row(InlineKeyboardButton("Назад в Меню", callback_data='main_menu'))
+    bot.send_message(call.message.chat.id, 'Выберите год подачи машины', reply_markup=markup)
 
 def select_month(call):
     markup = InlineKeyboardMarkup()
     markup.row(InlineKeyboardButton("Январь", callback_data=f"month_1"),
-                   InlineKeyboardButton("February", callback_data=f"month_2"),
-                   InlineKeyboardButton("March", callback_data=f"month_3"),
-                   InlineKeyboardButton("April", callback_data=f"month_4"),
-                   InlineKeyboardButton("May", callback_data=f"month_5"))
-    markup.row(InlineKeyboardButton("June", callback_data=f"month_6"),
-                   InlineKeyboardButton("July", callback_data=f"month_7"),
-                   InlineKeyboardButton("August", callback_data=f"month_8"),
-                   InlineKeyboardButton("September", callback_data=f"month_9"),
-                   InlineKeyboardButton("October", callback_data=f"month_10"))
-    markup.row(InlineKeyboardButton("November", callback_data=f"month_11"),
-                   InlineKeyboardButton("December", callback_data=f"month_12"))
-    markup.row(InlineKeyboardButton("Back to main menu", callback_data='main_menu'))
-    bot.send_message(call.message.chat.id, 'Выберете месяц подачи машины', reply_markup=markup)
+                   InlineKeyboardButton("Февраль", callback_data=f"month_2"),
+                   InlineKeyboardButton("Март", callback_data=f"month_3"),
+                   InlineKeyboardButton("Апрель", callback_data=f"month_4"),
+                   InlineKeyboardButton("Май", callback_data=f"month_5"))
+    markup.row(InlineKeyboardButton("Июнь", callback_data=f"month_6"),
+                   InlineKeyboardButton("Июль", callback_data=f"month_7"),
+                   InlineKeyboardButton("Август", callback_data=f"month_8"),
+                   InlineKeyboardButton("Сентябрь", callback_data=f"month_9"),
+                   InlineKeyboardButton("Октябрь", callback_data=f"month_10"))
+    markup.row(InlineKeyboardButton("Ноябрь", callback_data=f"month_11"),
+                   InlineKeyboardButton("Декабрь", callback_data=f"month_12"))
+    markup.row(InlineKeyboardButton("Назад в Меню", callback_data='main_menu'))
+    bot.send_message(call.message.chat.id, 'Выберите месяц подачи машины', reply_markup=markup)
 
 
 def day_selector(call):
@@ -243,23 +245,17 @@ def day_selector(call):
                    InlineKeyboardButton(days[day+2], callback_data=f'day_{days[day+2]}'),
                    InlineKeyboardButton(days[day+3], callback_data=f'day_{days[day+3]}'),
                    InlineKeyboardButton(days[day+4], callback_data=f'day_{days[day+4]}'))
-    bot.send_message(call.message.chat.id, 'Выберете день подачи машины', reply_markup=markup)
+    bot.send_message(call.message.chat.id, 'Выберите день подачи машины', reply_markup=markup)
 
 def show_delivery_times(call):
     markup = InlineKeyboardMarkup()
-    for i in range(7, 24):
-        time = f"{i}:00"
-        if i != 23:
-            markup.row(
-                InlineKeyboardButton(time, callback_data=f"time_{i}:00"),
-                InlineKeyboardButton(f"{i}:30", callback_data=f"time_{i}:30")
-            )
-        else:
-            markup.row(
-                InlineKeyboardButton(time, callback_data=f"time_{i}:00")
-            )
-    bot.send_message(call.message.chat.id, 'Выберете время подачи машины', reply_markup=markup)
-
+    for i in range(7, 20, 3):
+        markup.row(
+            InlineKeyboardButton(f"{i}:00", callback_data=f"time_{i}:00"),
+            InlineKeyboardButton(f"{i+1}:00", callback_data=f"time_{i+1}:00"),
+            InlineKeyboardButton(f"{i+2}:00", callback_data=f"time_{i+2}:00")
+        )
+    bot.send_message(call.message.chat.id, 'Выберите время подачи машины', reply_markup=markup)
 
 def select_city(call):
     markup = InlineKeyboardMarkup()
@@ -283,18 +279,46 @@ def select_city(call):
                    InlineKeyboardButton("Тиват", callback_data=f"city_18"),
                    InlineKeyboardButton("Улцинь", callback_data=f"city_19"),
                    InlineKeyboardButton("Херцег-Нови", callback_data=f"city_20"))
-    markup.row(InlineKeyboardButton("Back to main menu", callback_data='main_menu'))
-    bot.send_message(call.message.chat.id, 'Выберете город', reply_markup=markup)
+    markup.row(InlineKeyboardButton("Вернутся в меню", callback_data='main_menu'))
+    bot.send_message(call.message.chat.id, 'Выберите город', reply_markup=markup)
 
+
+
+
+def get_first_last_name(user_name):
+    user_name_parts = user_name.split()
+    return user_name_parts[0], user_name_parts[-1]
 
 
 def confirm_booking(call):
     bot.send_message(call.message.chat.id, 'Бронирование подтверждено! С вами скоро свяжется наш менеджер.\n')
     with open('output.txt', 'a', encoding='utf-8') as f:
-        f.write(f'Марка: {user_data.get("brand")}\n{"=" * 50}\nМодель: {user_data.get("model")}\n{"=" * 50}\nГод: {user_data.get("year")}\n{"=" * 50}\nМесяц подачи машины: {user_data.get("month_name")}\n{"=" * 50}\nДень подачи машины: {user_data.get("day")}\n{"=" * 50} ⏰\nВремя подачи машины: {user_data.get("time")}\n\n')
-        f.write(f'Город: {city[int(call.data[5:]) - 0]}\n{"=" * 50}\n')
-    bot.send_message(call.message.chat.id, f'Ваши данные бронирования:\n\n{"-" * 50}\n\nМарка: {user_data.get("brand")} 🚗\nМодель: {user_data.get("model")} 🏎️\nГод: {user_data.get("year")} \nМесяц подачи машины: {user_data.get("month_name")} 📅\nДень подачи машины: {user_data.get("day")} 📆\nВремя подачи машины: {user_data.get("time")}\n\nГород: {city[int(call.data[5:]) - 0]} 🏠\n\n Мы ждём вас ! 👥')
+        f.write(f'{" " * 12}🚗 Данные бронирования 🚗{" " * 20}\n')
+        f.write('**************************************************\n')
+        f.write(f'Марка: {user_data.get("brand")} 🚗\n')
+        f.write(f'{"=" * 50}\n')
+        f.write(f'Модель: {user_data.get("model")} 🏎️\n')
+        f.write(f'{"=" * 50}\n')
+        f.write(f'Год: {user_data.get("year")} \n')
+        f.write(f'{"=" * 50}\n')
+        f.write(f'Месяц подачи машины: {user_data.get("month_name")} 📅\n')
+        f.write(f'{"=" * 50}\n')
+        f.write(f'День подачи машины: {user_data.get("day")} \n')
+        f.write(f'⏰ Время подачи машины: {user_data.get("time")} ⏰\n')
+        f.write(f'{"=" * 50}\n')
+        f.write(f'🏠 Город: {city[int(call.data[5:]) - 0]} \n')
+        f.write('**************************************************\n')
+    bot.send_message(call.message.chat.id, f'Ваши данные бронирования:\n\n{"-" * 50}\n\nМарка: {user_data.get("brand")} 🚗\nМодель: {user_data.get("model")} 🏎️\nГод: {user_data.get("year")} \nМесяц подачи машины: {user_data.get("month_name")} 📅\nДень подачи машины: {user_data.get("day")} \n\nВаше Имя в Телеграмме: {call.from_user.full_name}\n\nВремя подачи машины: {user_data.get("time")} \n\nГород: {city[int(call.data[5:]) - 0]} 🏠\n\n Мы ждём вас ! 👥')
+    bot.send_message(866323263,
+                     f'Ваши данные бронирования:\n\n{"-" * 50}\n\nМарка: {user_data.get("brand")} 🚗\nМодель: {user_data.get("model")} 🏎️\nГод: {user_data.get("year")} \nМесяц подачи машины: {user_data.get("month_name")} 📅\nДень подачи машины: {user_data.get("day")} \n\nИмя Клиента Телеграмм: {call.from_user.full_name}\n\nВремя подачи машины: {user_data.get("time")} \n\nГород: {city[int(call.data[5:]) - 0]} 🏠\n\n Мы ждём вас ! 👥')
     bot.send_message(call.message.chat.id, 'Если у вас возникнут вопросы или проблемы с бронированием, пожалуйста, позвоните нам по номеру ☎️ 99999999999')
+
+    name = user_data.get('first_name')
+    surname = user_data.get('last_name')
+    phone_number = user_data.get('phone_number')
+
+    bot.send_message(call.message.chat.id, f'Ваше имя в Телеграмме: {name} {surname}')
+    bot.send_message(call.message.chat.id, f'Ваш номер телефона: {phone_number}')
 
 if __name__ == '__main__':
     bot.polling(none_stop=True)
