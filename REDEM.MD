@@ -9,7 +9,6 @@ logging.basicConfig(filename='bot.log', level=logging.INFO,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 
-
 @bot.message_handler(commands=['start'])
 def welcome(message):
     try:
