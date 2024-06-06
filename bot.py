@@ -3,6 +3,7 @@ import os
 from operator import call
 
 import telebot
+
 from telebot import types
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
@@ -112,7 +113,7 @@ def get_phone_number_input(message):
 
 @bot.message_handler(commands=['FAQ'])
 def handle_faq(message):
-    with open('FAQ.txt', 'r', encoding='utf-8') as file:
+    with open('FAQ.txt', encoding='utf-8') as file:
         file_contents = file.read()
     bot.send_message(message.chat.id, f"**FAQ Section:**\n\n{file_contents}", parse_mode='Markdown')
 
