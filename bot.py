@@ -1,15 +1,19 @@
-import logging
-import os
-from operator import call
-
 import telebot
 
+import logging
+import os
+import re
+from operator import call
 from telebot import types
+
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from Car_brands import car_brands
+
 from Car_model import car_models
+
 from config import TOKEN
+from res import responses
 
 bot = telebot.TeleBot(TOKEN)
 logging.basicConfig(filename='bot.log', level=logging.INFO,
@@ -58,8 +62,7 @@ def handle_instagram_button(message):
 
 selected_month = None
 selected_return_month = None
-
-selected_city = None
+selected_city: None = None
 selected_return_city = None
 user_data = {}
 
@@ -113,7 +116,7 @@ def get_phone_number_input(message):
 
 @bot.message_handler(commands=['FAQ'])
 def handle_faq(message):
-    with open('FAQ.txt', encoding='utf-8') as file:
+    with open('FAQ.txt', 'r', encoding='utf-8') as file:
         file_contents = file.read()
     bot.send_message(message.chat.id, f"**FAQ Section:**\n\n{file_contents}", parse_mode='Markdown')
 
@@ -395,6 +398,18 @@ def select_return_city(call):
         selected_return_city = int(call.data.split('_')[1])
     else:
         bot.send_message(chat_id=call.message.chat.id, text='Выберите город возврата машины', reply_markup=markup)
+
+
+@bot.message_handler(func=lambda message: True)
+def handle_message(message):
+    text = message.text.lower()
+    for pattern, response in responses.items():
+        if re.match(pattern, text):
+            bot.send_message(message.chat.id, response)
+            break
+    else:
+        bot.send_message(message.chat.id, "Я не могу найти ответ на ваш вопрос. Пожалуйста, опишите, что вы хотите "
+                                          "или Оставте заявку и наш менеджер с вами свяжется.Спасибо .")
 
 
 def get_first_last_name(user_name):
