@@ -10,15 +10,6 @@ from telebot import types, apihelper
 from utility import bot, user_bd
 import logging
 
-from pathlib import Path
-
-# Load environment variables from .env file
-env_path = Path('path_to_your_dotenv_file.env')  # replace with your .env file path
-if env_path.exists():
-    from dotenv import load_dotenv
-    load_dotenv(dotenv_path=env_path)
-
-
 logging.basicConfig(filename="logger.log", level=logging.INFO)
 
 info = '● /help — помощь по командам бота\n' \
