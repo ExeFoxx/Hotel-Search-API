@@ -1,1 +1,0 @@
-car_brands = ["Toyota", "Ford", "Honda", "Volkswagen"]
