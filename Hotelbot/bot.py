@@ -83,7 +83,7 @@ def get_text_messages(message):
         bot.send_message(message.from_user.id, info)
     elif message.text == '🌏 О сервисе':
         bot.send_message(message.from_user.id,
-                         'Telegram-бот для поиска подходящих пользователю отелей специально для Skillbox\n\n'
+                         'Telegram-бот для поиска подходящих пользователю отелей специально для Diplom_Skillbox\n\n'
                          'Если хочешь аналогичный бот то тебе к ➡️ @Jeremiazz ✅')
 
 
