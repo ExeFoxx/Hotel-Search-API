@@ -37,7 +37,7 @@ def handle_start_help(message):
     markup.row(btn_a, btn_b)
     markup.row(btn_c)
     if message.text == '/start':
-        start_help_text = f"Привет {user_bd[message.from_user.id].username}, я БОТ Too Easy Travel✅,\n" \
+        start_help_text = f"Привет {user_bd[message.from_user.id].username}, я БОТ Search Hotels all World✅,\n" \
                           "И я смогу подобрать для тебя отель 🏨"
         bot.send_message(message.from_user.id, start_help_text, reply_markup=markup)
     elif message.text == '/help':
