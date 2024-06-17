@@ -68,7 +68,7 @@ class SearchHotel:
         :param bot: объект телеграмм бота
         :param message: объект входящего сообщения от пользователя
         """
-        url = "https://hotels4.p.rapidapi.com/locations/search"
+        url = "https://hotels4.p.rapidapi.com/locations/v2/search"
         querystring = {"query": message.text, "locale": user_bd[message.chat.id].language}
         message_info = bot.send_message(message.from_user.id, 'Идет поиск информации по городу')
         pill2kill = threading.Event()
@@ -104,7 +104,7 @@ class SearchHotel:
         :param bot: объект телеграмм бота
         :param message: объект входящего сообщения от пользователя
         """
-        url = "https://hotels4.p.rapidapi.com/properties/list"
+        url = "https://hotels4.p.rapidapi.com/properties/v2/list"
 
         querystring = {
             "destinationId": user_bd[message.from_user.id].id_city,
