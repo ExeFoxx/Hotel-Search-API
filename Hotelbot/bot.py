@@ -2,7 +2,6 @@ from datetime import datetime
 import re
 
 
-# Load environment variables from .env file
 
 from users import Users
 from utility import next_step_city, config, next_step_count_hotels, next_step_count_photo, SearchHotel
