@@ -297,7 +297,7 @@ def get_end_distance(message: Message) -> None:
                 # best_deal_answer(message, data_dict, message.from_user.username)
                 low_high_price_answer(message, data_dict, message.from_user.username)
                 bot.set_state(message.from_user.id, UsersStates.last_command, message.chat.id)
-                bot.send_message(message.chat.id, f"Вот как-то так.\nМожете ввести ещё какую-нибудь команду!\n"
+                bot.send_message(message.chat.id, f"Поиск завершен 🎉, хорошего дня!\nТакже можете ввести ещё какую-нибудь команду!\n"
                                                   f"Например: <b>/help</b>", parse_mode="html")
         else:
             bot.send_message(message.from_user.id, '⚠️ Введите число больше нуля')
