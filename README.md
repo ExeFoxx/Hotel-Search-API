@@ -5,7 +5,7 @@ Telegram-бот для анализа сайта [Hotels.com](https://www.hotels
 Программа написана на языке **Python** в рамках курсовой работы к курсу Python-basic.
 
 - **Language** (язык): Russian
-- **Author** (Автор): [](https://)
+- **Author** (Автор): @Jeremiazz
 
 
 ## Как запустить бота:
