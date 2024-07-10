@@ -14,7 +14,8 @@ DEFAULT_COMMANDS = (
     ('lowprice', "Топ самых дешёвых отелей в городе"),
     ('highprice', "Топ самых дорогих отелей в городе"),
     ('bestdeal', "Настраиваемый поиск отелей"),
-    ('history', "История поиска")
+    ('history', "История поиска"),
+    ('service', "О сервисе")
 )
 RAPID_API_URL = "https://hotels4.p.rapidapi.com/v2/get-meta-data"
 RAPID_API_HEADERS = {
