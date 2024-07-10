@@ -1,0 +1,7 @@
+python-dotenv==0.20.0
+loguru==0.7.1
+python-telegram-bot-pagination==0.0.3
+pyTelegramBotAPI==5.1.0
+requests==2.29.0
+peewee==3.16.1
+python-telegram-bot-calendar==1.1.0
