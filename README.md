@@ -9,7 +9,6 @@ Telegram-бот для анализа сайта [Hotels.com](https://www.hotels
 
 
 ## Как запустить бота:
-- Скачать скрипт и распаковать архив
 - Установить зависимости: `pip install -r requirements.txt`
 - Создать telegram-бота у [BotFather](https://t.me/BotFather) и получить токен
 - Получить ключ от rapidapi:
