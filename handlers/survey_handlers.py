@@ -120,7 +120,7 @@ def need_photo_reply(call: CallbackQuery) -> None:
             calendar, step = DetailedTelegramCalendar(min_date=date.today()).build()
             bot.send_message(call.message.chat.id, f"Введите дату заезда", reply_markup=calendar)
         else:
-            bot.send_message(call.message.chat.id, text='⚠️ Нажмите кнопку "Да" или "Нет"')
+            bot.send_message(call.message.chat.id, text='⚠️ Нажмите кнопку "✅Да" или "❌Нет"')
 
 
 @bot.message_handler(state=UsersStates.amount_photo, is_digit=True)  # Если количество фото - число

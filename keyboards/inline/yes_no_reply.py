@@ -10,7 +10,7 @@ def get_yes_no() -> InlineKeyboardMarkup:
     """
     keyboard = InlineKeyboardMarkup(row_width=2)
     keyboard.add(
-        InlineKeyboardButton(text='Да', callback_data='yes'),
-        InlineKeyboardButton(text='Нет', callback_data='no')
+        InlineKeyboardButton(text='✅Да', callback_data='yes'),
+        InlineKeyboardButton(text='❌Нет', callback_data='no')
     )
     return keyboard

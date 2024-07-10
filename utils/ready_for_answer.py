@@ -7,7 +7,7 @@ from utils.pager_for_paginator import my_pages
 from database.db_controller import save_history
 from keyboards.inline.paginator import show_paginator
 from loguru import logger
-import time
+
 
 
 @logger.catch()
@@ -41,6 +41,8 @@ def low_high_price_answer(message: Message, data: Dict, user: str) -> None:
                 f"Длительность поездки: <b>{amount_nights} ноч.</b> " \
                 f"(с {data['start_date']} по {data['end_date']})."
     loading_animation = ['⌛']
+    bot.send_message(message.chat.id, reply_str, parse_mode="html")
+
     for char in loading_animation:
         bot.send_message(message.chat.id, char, parse_mode="html", disable_web_page_preview=True)
 
