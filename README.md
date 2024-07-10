@@ -16,9 +16,8 @@ Telegram-бот для анализа сайта [Hotels.com](https://www.hotels
     - Зарегистрироваться на сайте [rapidapi.com](https://rapidapi.com/apidojo/api/hotels4/)
     - Перейти в API Marketplace → категория Travel → Hotels (либо просто перейти по прямой ссылке на документацию [Hotels API Documentation](https://rapidapi.com/apidojo/api/hotels4/))
     - Нажать кнопку **Subscribe to Test**
-    - Выбрать пакет (есть бесплатный вариант)
     - Забрать KEY
-- Создать файл **.env** и прописать там BOT_TOKEN и RAPID_API_KEY так, как это представленно в файле-шаблоне .env.template
+- Создать файл **.env** и прописать там BOT_TOKEN и RAPID_API_KEY так.
 - Запустить бота: `python main.py`
 
 
