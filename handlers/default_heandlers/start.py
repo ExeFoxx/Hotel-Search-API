@@ -8,6 +8,7 @@ import requests
 @bot.message_handler(commands=['start'])
 @logger.catch
 def bot_start(message: Message) -> None:
+
     """
     Функция, реагирующая на команду 'start'. Выводит приветственное сообщение.
 

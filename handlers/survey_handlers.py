@@ -7,24 +7,25 @@ from states.search_info import UsersStates
 from telegram_bot_calendar import DetailedTelegramCalendar
 from datetime import date, timedelta
 from utils.get_cities import parse_cities_group
-from utils.ready_for_answer import low_high_price_answer  # best_deal_answer
+from utils.ready_for_answer import low_high_price_answer
 from loguru import logger
 import re
 
+users_data = {}
 
-@bot.message_handler(state=UsersStates.cities, is_digit=True)  # Если название города - цифры
+
+@bot.message_handler(state=UsersStates.cities, is_digit=True)
 @logger.catch
 def get_city_incorrect(message: Message) -> None:
-    """
-    Функция, ожидающая некорректный ввод города. Если название города - цифры - выводит сообщение об ошибке.
+    user_id = message.from_user.id
+    if user_id not in users_data:
+        users_data[user_id] = {}
+    users_data[user_id]['cities'] = None
 
-    :param message: Сообщение Telegram
-    """
-
-    bot.send_message(message.from_user.id, '⚠️ Название города должно состоять из букв')
+    bot.send_message(user_id, '⚠️ Название города должно состоять из букв')
 
 
-@bot.message_handler(state=UsersStates.cities, is_digit=False)  # Если название города - не цифры
+@bot.message_handler(state=UsersStates.cities, is_digit=False)
 @logger.catch
 def get_city(message: Message) -> None:
     """
