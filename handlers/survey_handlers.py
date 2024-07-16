@@ -11,21 +11,20 @@ from utils.ready_for_answer import low_high_price_answer
 from loguru import logger
 import re
 
-users_data = {}
 
-
-@bot.message_handler(state=UsersStates.cities, is_digit=True)
+@bot.message_handler(state=UsersStates.cities, is_digit=True)  # Если название города - цифры
 @logger.catch
 def get_city_incorrect(message: Message) -> None:
-    user_id = message.from_user.id
-    if user_id not in users_data:
-        users_data[user_id] = {}
-    users_data[user_id]['cities'] = None
+    """
+    Функция, ожидающая некорректный ввод города. Если название города - цифры - выводит сообщение об ошибке.
 
-    bot.send_message(user_id, '⚠️ Название города должно состоять из букв')
+    :param message: Сообщение Telegram
+    """
+
+    bot.send_message(message.from_user.id, '⚠️ Название города должно состоять из букв')
 
 
-@bot.message_handler(state=UsersStates.cities, is_digit=False)
+@bot.message_handler(state=UsersStates.cities, is_digit=False)  # Если название города - не цифры
 @logger.catch
 def get_city(message: Message) -> None:
     """
