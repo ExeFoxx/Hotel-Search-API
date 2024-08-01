@@ -12,7 +12,7 @@ DEFAULT_COMMANDS = (
     ('start', "Запустить бота"),
     ('help', "Вывести справку"),
     ('lowprice', "Топ самых дешёвых отелей в городе"),
-    ('highprice', "Топ самых дорогих отелей в городе"),
+    ('review', "Топ отелей с лучшими отзывами посетителей"),
     ('bestdeal', "Настраиваемый поиск отелей"),
     ('history', "История поиска"),
     ('service', "О сервисе")
@@ -26,7 +26,7 @@ RAPID_API_HEADERS = {
 RAPID_API_ENDPOINTS = {
     "cities-groups": "https://hotels4.p.rapidapi.com/locations/v3/search",
     "hotel-list": "https://hotels4.p.rapidapi.com/properties/v2/list",
-    "hotel-photos": "https://hotels4.p.rapidapi.com/properties/v2/detail"
+    "hotel-photos": "https://hotels4.p.rapidapi.com/properties/v2/get-summary"
 }
 
 LOG_PATH = os.path.abspath(os.path.join('logs', 'debug.log'))

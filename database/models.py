@@ -32,7 +32,7 @@ class History(BaseModel):
 
     Attributes:
         date (datetime.date): Дата запроса пользователя.
-        command (str): Команда запроса ('lowprice', 'highprice', 'bestdeal').
+        command (str): Команда запроса ('lowprice', 'review', 'bestdeal').
         city (str): Город.
         start_date (datetime.date): Дата заселения в отель.
         end_date (datetime.date): Дата выселения из отеля.

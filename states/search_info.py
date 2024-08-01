@@ -32,3 +32,6 @@ class UsersStates(StatesGroup):
     start_price = State()
     end_price = State()
     end_distance = State()
+    adults_count = State()
+    children_count = State()
+    children_age = State()

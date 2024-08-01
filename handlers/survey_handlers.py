@@ -7,7 +7,7 @@ from states.search_info import UsersStates
 from telegram_bot_calendar import DetailedTelegramCalendar
 from datetime import date, timedelta
 from utils.get_cities import parse_cities_group
-from utils.ready_for_answer import low_high_price_answer
+from utils.ready_for_answer import low_high_price_answer  # best_deal_answer
 from loguru import logger
 import re
 
@@ -163,7 +163,7 @@ def date_reply(call: CallbackQuery) -> None:
     Проверяет, записаны ли состояния 'start_date' и 'end_date'.
     Если нет - снова предлагает выбрать дату и записывает эти состояния.
     Если да, то проверяет состояние пользователя 'last_command'.
-    Если 'last_command' == 'lowprice' или 'highprice' - завершает опрос и
+    Если 'last_command' == 'lowprice' или 'review' - завершает опрос и
     вызывает функцию для подготовки ответа на запрос пользователя. Затем ожидает ввода следующей команды.
     Иначе продолжает опрос и предлагает ввести минимальную цену за ночь.
 
@@ -191,7 +191,7 @@ def date_reply(call: CallbackQuery) -> None:
 
                 bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id, reply_markup=None)
 
-                if data.get('last_command') in ('lowprice', 'highprice'):
+                if data.get('last_command') in ('lowprice', 'review'):
                     data_dict = data
                     low_high_price_answer(call.message, data_dict, call.from_user.username)
                     bot.set_state(call.from_user.id, UsersStates.last_command, call.message.chat.id)
