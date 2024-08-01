@@ -15,9 +15,10 @@ def bot_low_price(message: Message) -> None:
     :param message: Сообщение Telegram
     """
 
-    bot.delete_state(message.from_user.id, message.chat.id)  # перед началом опроса зачищаем все собранные состояния
-    bot.set_state(message.from_user.id, UsersStates.cities, message.chat.id)
-    bot.send_message(message.from_user.id, 'Введите город')
+    bot.delete_state(message.from_user.id, message.chat.id)  # очищаем состояния перед новым опросом
+    bot.set_state(message.from_user.id, UsersStates.adults_count, message.chat.id)
+    bot.send_message(message.from_user.id, 'Сколько взрослых будет путешествовать?')
+
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
         data['last_command'] = 'review'
 
