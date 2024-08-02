@@ -46,6 +46,7 @@ class History(BaseModel):
     end_date = DateField()
     from_user = ForeignKeyField(User.name)
 
+
     class Meta:
         db_table = 'histories'
         order_by = 'date'
@@ -75,6 +76,7 @@ class SearchResult(BaseModel):
     hotel_url = CharField()
     hotel_neighbourhood = CharField()
     amount_nights = IntegerField()
+
     from_date = ForeignKeyField(History.date)
 
     class Meta:
